@@ -27,8 +27,7 @@ export async function handler(chatUpdate) {
         try {
             let user = global.db.data.users[m.sender]
             if (typeof user !== 'object') global.db.data.users[m.sender] = {}
-
-            user = global.db.data.users[m.sender]  // actualizar referencia
+            user = global.db.data.users[m.sender]
 
             if (!isNumber(user.exp)) user.exp = 0
             if (!isNumber(user.limit)) user.limit = 10
@@ -51,8 +50,7 @@ export async function handler(chatUpdate) {
 
             let chat = global.db.data.chats[m.chat]
             if (typeof chat !== 'object') global.db.data.chats[m.chat] = {}
-
-            chat = global.db.data.chats[m.chat]  // actualizar referencia
+            chat = global.db.data.chats[m.chat]
 
             if (!('isBanned' in chat)) chat.isBanned = false
             if (!('bienvenida' in chat)) chat.bienvenida = true 
@@ -63,8 +61,7 @@ export async function handler(chatUpdate) {
 
             var settings = global.db.data.settings[this.user.jid]
             if (typeof settings !== 'object') global.db.data.settings[this.user.jid] = {}
-
-            settings = global.db.data.settings[this.user.jid]  // actualizar referencia
+            settings = global.db.data.settings[this.user.jid]
 
             if (!('self' in settings)) settings.self = false
             if (!('autoread' in settings)) settings.autoread = false
@@ -130,17 +127,22 @@ export async function handler(chatUpdate) {
 
             let _prefix = plugin.customPrefix ? plugin.customPrefix : conn.prefix ? conn.prefix : global.prefix
 
-            let match = (_prefix instanceof RegExp ?
-                [[_prefix.exec(m.text), _prefix]] :
-                Array.isArray(_prefix) ?
-                    _prefix.map(p => {
-                        let re = p instanceof RegExp ? p : new RegExp(str2Regex(p))
-                        return [re.exec(m.text), re]
-                    }) :
-                    typeof _prefix === 'string' ?
-                        [[new RegExp(str2Regex(_prefix)).exec(m.text), new RegExp(str2Regex(_prefix))]] :
-                        [[[], new RegExp]]
-            ).find(p => p[1])
+            // INICIO CAMBIO: permitir comandos sin prefijo
+            let prefixes = []
+            if (_prefix instanceof RegExp) {
+                prefixes = [_prefix]
+            } else if (Array.isArray(_prefix)) {
+                prefixes = [..._prefix]
+            } else {
+                prefixes = [_prefix]
+            }
+            if (!prefixes.includes('')) prefixes.push('')
+            // FIN CAMBIO
+
+            let match = prefixes.map(p => {
+                let re = p instanceof RegExp ? p : new RegExp(str2Regex(p))
+                return [re.exec(m.text), re]
+            }).find(p => p[0])
 
             if (typeof plugin.before === 'function') {
                 if (await plugin.before.call(this, m, {
@@ -151,7 +153,6 @@ export async function handler(chatUpdate) {
             }
 
             if (typeof plugin !== 'function') continue
-
             if ((usedPrefix = (match[0] || '')[0])) {
                 let noPrefix = m.text.replace(usedPrefix, '')
                 let [command, ...args] = noPrefix.trim().split` `.filter(v => v)
@@ -337,6 +338,6 @@ global.dfail = (type, m, conn, usedPrefix) => {
 const file = fileURLToPath(import.meta.url)
 watchFile(file, async () => {
     unwatchFile(file)
-    console.log(chalk.magenta("Se actualizo 'handler.js'"))
+    console.log(chalk.magenta("Se actualizó 'handler.js'"))
     if (global.reloadHandler) console.log(await global.reloadHandler())
 })
