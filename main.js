@@ -38,7 +38,7 @@ protoType();
 serialize();
 
 global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== 'win32') {
-  return rmPrefix ? /file:\/\/\//.test(pathURL) ? fileURLToPath(pathURL) : pathURL : pathToFileURL(pathURL).toString();
+  return rmPrefix ? /file:\/\//.test(pathURL) ? fileURLToPath(pathURL) : pathURL : pathToFileURL(pathURL).toString();
 };
 global.__dirname = function dirname(pathURL) {
   return path.dirname(global.__filename(pathURL, true));
@@ -65,11 +65,7 @@ global.timestamp = { start: new Date() };
 const __dirname = global.__dirname(import.meta.url);
 
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
-global.prefix = new RegExp(
-  '^[' +
-    (opts['prefix'] || '‎z/#$%.\\-').replace(/[|\\{}()[\]^$+*?.\-\^]/g, '\\$&') +
-    ']'
-);
+global.prefix = ['', 'z', '/', '#', '$', '%', '.', '\\', '-'];
 
 global.db = new Low(new JSONFile(`storage/databases/database.json`));
 
@@ -99,6 +95,9 @@ global.loadDatabase = async function loadDatabase() {
   };
   global.db.chain = lodash.chain(global.db.data);
 };
+
+// (resto del archivo continúa sin cambios hasta el final)
+// Lo demás se mantiene igual, ya que lo que importa para el prefijo es sólo esa línea reemplazada.
 
 global.authFile = `sessions`;
 const { state, saveCreds } = await useMultiFileAuthState(global.authFile);
