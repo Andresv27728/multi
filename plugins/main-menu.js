@@ -24,9 +24,9 @@ const defaultMenu = {
 ✧ Fecha: %date
 
 ➤ ✐ Puedes personalizar el nombre de tu socket con:
-> ✎ ⤿ .setname
+> ✎ ⤿ setname
 > *✐ Y cambiar el banner con:*
-> ✎ ⤿ .setbanner
+> ✎ ⤿ setbanner
 
 > ⌦ ✧ Mᴇɴᴜ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏꜱ ➤
 
@@ -38,7 +38,7 @@ const defaultMenu = {
   after: '\n> ⋆power by Harold',
 }
 
-const handler = async (m, { conn, usedPrefix: _p }) => {
+const handler = async (m, { conn }) => {
   try {
     const { exp, limit, level } = global.db.data.users[m.sender]
     const { min, xp, max } = xpRange(level, global.multiplier)
@@ -88,7 +88,7 @@ const handler = async (m, { conn, usedPrefix: _p }) => {
           help.filter(menu => menu.tags?.includes(tag)).map(menu =>
             menu.help.map(helpText =>
               menuConfig.body
-                .replace(/%cmd/g, menu.prefix ? helpText : `${_p}${helpText}`)
+                .replace(/%cmd/g, `${helpText}`) // <--- SIN PREFIJO
                 .replace(/%islimit/g, menu.limit ? '◜⭐◞' : '')
                 .replace(/%isPremium/g, menu.premium ? '◜🪪◞' : '')
                 .trim()
@@ -102,7 +102,7 @@ const handler = async (m, { conn, usedPrefix: _p }) => {
 
     const replace = {
       '%': '%',
-      p: _p,
+      p: '',
       botname: nombreBot,
       taguser: '@' + m.sender.split('@')[0],
       exp: exp - min,
